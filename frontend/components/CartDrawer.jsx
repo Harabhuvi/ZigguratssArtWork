@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, ShieldCheck, ArrowRight, CheckCircle2, Loader2, CreditCard } from "lucide-react";
 
 export default function CartDrawer({ isOpen, onClose, cartItems, onRemoveItem, onClearCart }) {
@@ -13,8 +14,6 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onRemoveItem, o
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
-
-  if (!isOpen) return null;
 
   const total = cartItems.reduce((acc, item) => acc + item.price, 0);
 
@@ -73,9 +72,24 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onRemoveItem, o
   };
 
   return (
-    <>
-      <div className="drawer-overlay" onClick={onClose} />
-      <aside className="drawer-panel">
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            className="drawer-overlay"
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          />
+          <motion.aside
+            className="drawer-panel"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 280 }}
+          >
         <div style={{
           padding: "24px",
           borderBottom: "1px solid var(--border-subtle)",
@@ -343,7 +357,9 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onRemoveItem, o
             <span>White-glove insured delivery with certified authenticity documentation.</span>
           </div>
         )}
-      </aside>
-    </>
+      </motion.aside>
+      </>
+      )}
+    </AnimatePresence>
   );
 }

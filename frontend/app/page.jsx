@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "../components/Navbar";
 import PaintingCanvasHero from "../components/PaintingCanvasHero";
 import VirtualGallery3D from "../components/VirtualGallery3D";
@@ -319,7 +320,12 @@ export default function HomePage() {
 
       <main>
         <section style={{ paddingTop: "clamp(80px, 10vw, 105px)", paddingBottom: "16px" }}>
-          <div className="container">
+          <motion.div 
+            className="container"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <div style={{
               display: "flex",
               alignItems: "center",
@@ -374,12 +380,18 @@ export default function HomePage() {
             ) : (
               <PaintingCanvasHero onExploreArt={scrollToGallery} />
             )}
-          </div>
+          </motion.div>
         </section>
 
         <section id="gallery-section" style={{ paddingTop: "clamp(32px, 5vw, 56px)", paddingBottom: "clamp(60px, 8vw, 100px)" }}>
           <div className="container">
-            <div style={{ textAlign: "center", maxWidth: "640px", margin: "0 auto 40px auto" }}>
+            <motion.div 
+              style={{ textAlign: "center", maxWidth: "640px", margin: "0 auto 40px auto" }}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
               <span className="tag-badge tag-painting" style={{ marginBottom: "12px" }}>
                 Curated Atelier
               </span>
@@ -389,7 +401,7 @@ export default function HomePage() {
               <p style={{ color: "var(--text-secondary)", fontSize: "0.98rem", lineHeight: "1.6" }}>
                 Handcrafted canvases, tactile sculptures, and certified digital art created by leading international contemporary masters.
               </p>
-            </div>
+            </motion.div>
 
             <CategoryFilter
               selectedCategory={selectedCategory}
@@ -425,7 +437,13 @@ export default function HomePage() {
                 </button>
               </div>
             ) : (
-              <div className="artworks-grid">
+              <motion.div 
+                className="artworks-grid"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
                 {filteredArtworks.map((artwork) => (
                   <ArtworkCard
                     key={artwork.id}
@@ -435,14 +453,20 @@ export default function HomePage() {
                     isInCart={cartItems.some(i => i.id === artwork.id)}
                   />
                 ))}
-              </div>
+              </motion.div>
             )}
           </div>
         </section>
 
         <section style={{ padding: "70px 0", background: "rgba(17, 19, 26, 0.6)", borderTop: "1px solid var(--border-subtle)", borderBottom: "1px solid var(--border-subtle)" }}>
           <div className="container">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "32px" }}>
+            <motion.div 
+              style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "32px" }}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
               <div style={{ display: "flex", gap: "16px" }}>
                 <div style={{ 
                   width: "48px", 
@@ -508,27 +532,35 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
       </main>
 
       <Footer onSelectCategory={(cat) => { setSelectedCategory(cat); scrollToGallery(); }} />
 
-      <ArtworkModal
-        artwork={selectedArtwork}
-        onClose={() => setSelectedArtwork(null)}
-        onAddToCart={handleAddToCart}
-        isInCart={selectedArtwork ? cartItems.some(i => i.id === selectedArtwork.id) : false}
-      />
+      <AnimatePresence>
+        {selectedArtwork && (
+          <ArtworkModal
+            artwork={selectedArtwork}
+            onClose={() => setSelectedArtwork(null)}
+            onAddToCart={handleAddToCart}
+            isInCart={selectedArtwork ? cartItems.some(i => i.id === selectedArtwork.id) : false}
+          />
+        )}
+      </AnimatePresence>
 
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cartItems={cartItems}
-        onRemoveItem={handleRemoveItem}
-        onClearCart={() => setCartItems([])}
-      />
+      <AnimatePresence>
+        {isCartOpen && (
+          <CartDrawer
+            isOpen={isCartOpen}
+            onClose={() => setIsCartOpen(false)}
+            cartItems={cartItems}
+            onRemoveItem={handleRemoveItem}
+            onClearCart={() => setCartItems([])}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
