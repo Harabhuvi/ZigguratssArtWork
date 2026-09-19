@@ -292,19 +292,6 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
       }
     };
 
-    let lastWheelTime = 0;
-    const handleWheel = (e) => {
-      const now = Date.now();
-      if (Math.abs(e.deltaY) > 60 && now - lastWheelTime > 800) {
-        lastWheelTime = now;
-        if (e.deltaY > 0) {
-          goToNextStop();
-        } else {
-          goToPrevStop();
-        }
-      }
-    };
-
     let touchStartX = 0;
     let touchStartY = 0;
     const handleTouchStart = (e) => {
@@ -318,7 +305,7 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
       if (e.changedTouches.length > 0) {
         const dx = touchStartX - e.changedTouches[0].clientX;
         const dy = touchStartY - e.changedTouches[0].clientY;
-        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+        if (Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) > 50) {
           if (dx > 0) {
             goToNextStop();
           } else {
@@ -329,13 +316,12 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
     };
 
     const handleKeyDown = (e) => {
-      if (e.key === "ArrowRight" || e.key === "ArrowDown") goToNextStop();
-      if (e.key === "ArrowLeft" || e.key === "ArrowUp") goToPrevStop();
+      if (e.key === "ArrowRight") goToNextStop();
+      if (e.key === "ArrowLeft") goToPrevStop();
     };
 
     canvas.addEventListener("pointermove", handlePointerMove);
     canvas.addEventListener("click", handlePointerClick);
-    canvas.addEventListener("wheel", handleWheel, { passive: true });
     canvas.addEventListener("touchstart", handleTouchStart, { passive: true });
     canvas.addEventListener("touchend", handleTouchEnd, { passive: true });
     window.addEventListener("keydown", handleKeyDown);
@@ -381,7 +367,6 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
       window.removeEventListener("keydown", handleKeyDown);
       canvas.removeEventListener("pointermove", handlePointerMove);
       canvas.removeEventListener("click", handlePointerClick);
-      canvas.removeEventListener("wheel", handleWheel);
       canvas.removeEventListener("touchstart", handleTouchStart);
       canvas.removeEventListener("touchend", handleTouchEnd);
       renderer.dispose();
@@ -404,7 +389,8 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
         borderRadius: "clamp(14px, 3vw, 24px)",
         border: "1px solid var(--border-subtle)",
         background: "#0a0b10",
-        boxShadow: "0 25px 70px -10px rgba(0, 0, 0, 0.95)"
+        boxShadow: "0 25px 70px -10px rgba(0, 0, 0, 0.95)",
+        touchAction: "pan-y"
       }}
     >
       <canvas

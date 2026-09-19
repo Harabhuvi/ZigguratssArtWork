@@ -232,26 +232,6 @@ export default function ArtworkModal({ artwork, onClose, onAddToCart, isInCart }
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @media (min-width: 860px) {
-          .modal-grid {
-            grid-template-columns: 1.1fr 1fr !important;
-          }
-        }
-        @media (max-width: 640px) {
-          .modal-info-pane {
-            padding: 20px 16px !important;
-          }
-          .modal-action-bar {
-            flex-direction: column;
-            align-items: stretch !important;
-          }
-          .modal-action-bar button {
-            width: 100% !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

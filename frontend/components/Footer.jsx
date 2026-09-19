@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, ShieldCheck, Award, Globe } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, ShieldCheck, Award, Globe, User, Package, CreditCard } from "lucide-react";
 
 export default function Footer({ onSelectCategory }) {
   const [email, setEmail] = useState("");
@@ -12,6 +13,14 @@ export default function Footer({ onSelectCategory }) {
     if (email) {
       setSubscribed(true);
       setEmail("");
+    }
+  };
+
+  const handleCategoryClick = (cat) => {
+    if (onSelectCategory) {
+      onSelectCategory(cat);
+    } else {
+      window.location.href = `/?category=${cat}#gallery-section`;
     }
   };
 
@@ -31,12 +40,14 @@ export default function Footer({ onSelectCategory }) {
           marginBottom: "60px"
         }}>
           <div>
-            <div style={{ fontSize: "1.6rem", letterSpacing: "0.22em", fontFamily: "var(--font-serif)", color: "#fff", marginBottom: "8px" }}>
-              ZIGGURAT
-            </div>
-            <p style={{ fontSize: "0.78rem", color: "var(--gold-primary)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "16px" }}>
-              International Fine Art Salon
-            </p>
+            <Link href="/" style={{ display: "inline-block", textDecoration: "none" }}>
+              <div style={{ fontSize: "1.6rem", letterSpacing: "0.22em", fontFamily: "var(--font-serif)", color: "#fff", marginBottom: "4px" }}>
+                ZIGGURAT
+              </div>
+              <p style={{ fontSize: "0.78rem", color: "var(--gold-primary)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "16px" }}>
+                International Fine Art Salon
+              </p>
+            </Link>
             <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: "1.7" }}>
               Curating rare oil paintings, museum-grade bronze and marble sculptures, and certified generative digital art for discerning private collections.
             </p>
@@ -49,31 +60,31 @@ export default function Footer({ onSelectCategory }) {
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "10px" }}>
               <li>
                 <button 
-                  onClick={() => onSelectCategory("painting")}
+                  onClick={() => handleCategoryClick("painting")}
                   style={{ color: "var(--text-secondary)", fontSize: "0.88rem", transition: "var(--transition)" }}
                 >
-                  Oil & Encaustic Paintings
+                  Oil &amp; Encaustic Paintings
                 </button>
               </li>
               <li>
                 <button 
-                  onClick={() => onSelectCategory("sculpture")}
+                  onClick={() => handleCategoryClick("sculpture")}
                   style={{ color: "var(--text-secondary)", fontSize: "0.88rem", transition: "var(--transition)" }}
                 >
-                  Marble & Bronze Sculptures
+                  Marble &amp; Bronze Sculptures
                 </button>
               </li>
               <li>
                 <button 
-                  onClick={() => onSelectCategory("digital_art")}
+                  onClick={() => handleCategoryClick("digital_art")}
                   style={{ color: "var(--text-secondary)", fontSize: "0.88rem", transition: "var(--transition)" }}
                 >
-                  Generative & 3D Digital Editions
+                  Generative &amp; 3D Digital Editions
                 </button>
               </li>
               <li>
                 <button 
-                  onClick={() => onSelectCategory("all")}
+                  onClick={() => handleCategoryClick("all")}
                   style={{ color: "var(--text-secondary)", fontSize: "0.88rem", transition: "var(--transition)" }}
                 >
                   Masterworks Archive
@@ -84,22 +95,43 @@ export default function Footer({ onSelectCategory }) {
 
           <div id="collector-services">
             <h4 style={{ fontSize: "1rem", color: "#fff", letterSpacing: "0.06em", marginBottom: "16px", textTransform: "uppercase" }}>
-              Collector Services
+              Patron Portal &amp; Services
             </h4>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", color: "var(--text-secondary)", fontSize: "0.85rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <ShieldCheck size={16} color="var(--gold-primary)" />
-                <span>Atelier Authenticity Guarantee</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Globe size={16} color="var(--gold-primary)" />
-                <span>Worldwide Secure Transit & Customs</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Award size={16} color="var(--gold-primary)" />
-                <span>Private Auction Consignment</span>
-              </div>
-            </div>
+            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <li>
+                <Link
+                  href="/profile"
+                  style={{ display: "inline-flex", alignItems: "center", gap: "8px", color: "var(--text-secondary)", fontSize: "0.88rem", transition: "var(--transition)" }}
+                >
+                  <User size={15} color="var(--gold-primary)" />
+                  <span>Patron Profile Dossier</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/orders"
+                  style={{ display: "inline-flex", alignItems: "center", gap: "8px", color: "var(--text-secondary)", fontSize: "0.88rem", transition: "var(--transition)" }}
+                >
+                  <Package size={15} color="var(--gold-primary)" />
+                  <span>Acquisition Orders &amp; Tracking</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/payment"
+                  style={{ display: "inline-flex", alignItems: "center", gap: "8px", color: "var(--text-secondary)", fontSize: "0.88rem", transition: "var(--transition)" }}
+                >
+                  <CreditCard size={15} color="var(--gold-primary)" />
+                  <span>Acquisition Desk &amp; Checkout</span>
+                </Link>
+              </li>
+              <li>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", color: "var(--text-muted)", fontSize: "0.84rem", marginTop: "4px" }}>
+                  <ShieldCheck size={14} color="var(--gold-primary)" />
+                  <span>Atelier Authenticity Guarantee</span>
+                </div>
+              </li>
+            </ul>
           </div>
 
           <div>
@@ -135,6 +167,7 @@ export default function Footer({ onSelectCategory }) {
                 />
                 <button
                   type="submit"
+                  aria-label="Subscribe"
                   style={{
                     width: "36px",
                     height: "36px",
@@ -166,9 +199,9 @@ export default function Footer({ onSelectCategory }) {
         }}>
           <div>&copy; {new Date().getFullYear()} ZIGGURAT Art Gallery. All Rights Reserved.</div>
           <div style={{ display: "flex", gap: "20px" }}>
-            <span>Privacy Policy</span>
-            <span>Provenance Guidelines</span>
-            <span>Terms of Acquisition</span>
+            <Link href="/" style={{ color: "inherit" }}>Fine Art Salon</Link>
+            <Link href="/orders" style={{ color: "inherit" }}>Provenance Ledger</Link>
+            <Link href="/profile" style={{ color: "inherit" }}>Patron Terms</Link>
           </div>
         </div>
       </div>

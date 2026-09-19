@@ -414,20 +414,19 @@ export default function PaintingCanvasHero({ onExploreArt }) {
   };
 
   return (
-    <section style={{ position: "relative", paddingTop: "90px", paddingBottom: "40px", overflow: "hidden" }}>
-      <div className="container">
-        <div className="paint-canvas-container" style={{ position: "relative", borderRadius: "20px", overflow: "hidden", border: "1px solid var(--border-subtle)" }}>
-          <canvas
-            ref={canvasRef}
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              zIndex: 1,
-              touchAction: "pan-y"
-            }}
-          />
+    <div style={{ position: "relative", width: "100%", overflow: "hidden", touchAction: "pan-y" }}>
+      <div className="paint-canvas-container" style={{ position: "relative", borderRadius: "20px", overflow: "hidden", border: "1px solid var(--border-subtle)", touchAction: "pan-y" }}>
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 1,
+            touchAction: "pan-y"
+          }}
+        />
 
           <div
             className="artist-status-pill"
@@ -574,19 +573,5 @@ export default function PaintingCanvasHero({ onExploreArt }) {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @media (max-width: 640px) {
-          .hero-overlay-content {
-            padding: 24px 16px !important;
-          }
-          .artist-status-pill {
-            top: 10px !important;
-            right: 10px !important;
-            font-size: 0.72rem !important;
-          }
-        }
-      `}</style>
-    </section>
   );
 }

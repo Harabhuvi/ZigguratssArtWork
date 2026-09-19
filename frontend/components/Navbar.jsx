@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ShoppingBag, Search, Menu, X } from "lucide-react";
+import Link from "next/link";
+import { ShoppingBag, Search, Menu, X, User, Package } from "lucide-react";
 
 export default function Navbar({ cartCount, onOpenCart, onSearch, activeCategory, onSelectCategory }) {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -71,7 +72,7 @@ export default function Navbar({ cartCount, onOpenCart, onSearch, activeCategory
           transition: "padding 0.35s ease"
         }}
       >
-        <a href="#" style={{ display: "flex", flexDirection: "column", gap: "2px", flexShrink: 0 }}>
+        <Link href="/" style={{ display: "flex", flexDirection: "column", gap: "2px", flexShrink: 0 }}>
           <span style={{
             fontSize: "clamp(1.2rem, 3vw, 1.6rem)",
             letterSpacing: "0.28em",
@@ -92,14 +93,14 @@ export default function Navbar({ cartCount, onOpenCart, onSearch, activeCategory
           }}>
             Atelier &amp; Fine Art
           </span>
-        </a>
+        </Link>
 
         <nav
           className="desktop-nav"
           style={{
             display: "none",
             alignItems: "center",
-            gap: "clamp(20px, 3vw, 36px)",
+            gap: "clamp(16px, 2.5vw, 30px)",
             flex: 1,
             justifyContent: "center"
           }}
@@ -107,12 +108,40 @@ export default function Navbar({ cartCount, onOpenCart, onSearch, activeCategory
           {navLinks.map((link) => (
             <button
               key={link.id}
-              onClick={() => onSelectCategory(link.id)}
+              onClick={() => onSelectCategory ? onSelectCategory(link.id) : null}
               style={linkStyle(link.id)}
             >
               {link.label}
             </button>
           ))}
+
+          <Link
+            href="/orders"
+            style={{
+              fontSize: "0.88rem",
+              letterSpacing: "0.05em",
+              color: "var(--text-secondary)",
+              transition: "color 0.2s ease",
+              padding: "4px 0",
+              whiteSpace: "nowrap"
+            }}
+          >
+            Orders
+          </Link>
+
+          <Link
+            href="/profile"
+            style={{
+              fontSize: "0.88rem",
+              letterSpacing: "0.05em",
+              color: "var(--text-secondary)",
+              transition: "color 0.2s ease",
+              padding: "4px 0",
+              whiteSpace: "nowrap"
+            }}
+          >
+            Profile
+          </Link>
         </nav>
 
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
@@ -171,6 +200,25 @@ export default function Navbar({ cartCount, onOpenCart, onSearch, activeCategory
               <Search size={17} />
             </button>
           )}
+
+          <Link
+            href="/profile"
+            aria-label="Collector Profile"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid var(--border-subtle)",
+              color: "var(--text-primary)",
+              transition: "var(--transition)"
+            }}
+          >
+            <User size={18} color="var(--gold-primary)" />
+          </Link>
 
           <button
             onClick={onOpenCart}
@@ -280,7 +328,7 @@ export default function Navbar({ cartCount, onOpenCart, onSearch, activeCategory
           {navLinks.map((link) => (
             <button
               key={link.id}
-              onClick={() => { onSelectCategory(link.id); setMobileMenuOpen(false); }}
+              onClick={() => { if (onSelectCategory) onSelectCategory(link.id); setMobileMenuOpen(false); }}
               style={{
                 textAlign: "left",
                 fontSize: "1.05rem",
@@ -294,19 +342,53 @@ export default function Navbar({ cartCount, onOpenCart, onSearch, activeCategory
               {link.label}
             </button>
           ))}
+
+          <Link
+            href="/orders"
+            onClick={() => setMobileMenuOpen(false)}
+            style={{
+              textAlign: "left",
+              fontSize: "1.05rem",
+              color: "#fff",
+              padding: "12px 4px",
+              borderBottom: "1px solid rgba(255,255,255,0.04)",
+              transition: "color 0.2s ease"
+            }}
+          >
+            My Orders &amp; Consignments
+          </Link>
+
+          <Link
+            href="/profile"
+            onClick={() => setMobileMenuOpen(false)}
+            style={{
+              textAlign: "left",
+              fontSize: "1.05rem",
+              color: "#fff",
+              padding: "12px 4px",
+              borderBottom: "1px solid rgba(255,255,255,0.04)",
+              transition: "color 0.2s ease"
+            }}
+          >
+            Patron Profile Dossier
+          </Link>
+
+          <Link
+            href="/payment"
+            onClick={() => setMobileMenuOpen(false)}
+            style={{
+              textAlign: "left",
+              fontSize: "1.05rem",
+              color: "var(--gold-primary)",
+              fontWeight: 600,
+              padding: "12px 4px",
+              transition: "color 0.2s ease"
+            }}
+          >
+            Acquisition Checkout Desk &rarr;
+          </Link>
         </div>
       )}
-
-      <style jsx>{`
-        @media (min-width: 860px) {
-          .desktop-nav {
-            display: flex !important;
-          }
-          .mobile-toggle {
-            display: none !important;
-          }
-        }
-      `}</style>
     </header>
   );
 }

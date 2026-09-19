@@ -177,12 +177,6 @@ export default function ArtworkCard({ artwork, onSelect, onAddToCart, isInCart }
           </button>
         </div>
       </div>
-
-      <style jsx>{`
-        .artwork-card:hover .card-hover-overlay {
-          opacity: 1 !important;
-        }
-      `}</style>
     </article>
   );
 }

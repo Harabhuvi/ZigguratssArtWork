@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { X, Trash2, ShieldCheck, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { X, Trash2, ShieldCheck, ArrowRight, CheckCircle2, Loader2, CreditCard } from "lucide-react";
 
 export default function CartDrawer({ isOpen, onClose, cartItems, onRemoveItem, onClearCart }) {
   const [collectorName, setCollectorName] = useState("");
@@ -209,9 +210,26 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onRemoveItem, o
                 </div>
               ))}
 
-              <form onSubmit={handleSubmitInquiry} style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{ marginTop: "24px" }}>
+                <Link
+                  href="/payment"
+                  onClick={() => {
+                    try {
+                      localStorage.setItem("ziggurat_cart", JSON.stringify(cartItems));
+                    } catch (e) {}
+                    onClose();
+                  }}
+                  className="btn-gold"
+                  style={{ width: "100%", padding: "14px", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}
+                >
+                  <CreditCard size={18} />
+                  <span>Proceed to Payment Desk &bull; ${total.toLocaleString()} USD</span>
+                </Link>
+              </div>
+
+              <form onSubmit={handleSubmitInquiry} style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
                 <div style={{ fontSize: "0.84rem", fontWeight: 600, color: "var(--gold-primary)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                  Collector Acquisition Details
+                  Or Direct Curator Inquiry
                 </div>
 
                 {errorMsg && (

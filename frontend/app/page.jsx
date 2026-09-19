@@ -215,6 +215,14 @@ export default function HomePage() {
   const [heroMode, setHeroMode] = useState("3d_gallery");
 
   useEffect(() => {
+    try {
+      const savedCart = localStorage.getItem("ziggurat_cart");
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart);
+        if (Array.isArray(parsed)) setCartItems(parsed);
+      }
+    } catch (e) {}
+
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
     fetch(`${apiUrl}/artworks`)
       .then(res => res.json())
@@ -273,16 +281,22 @@ export default function HomePage() {
   const handleAddToCart = (artwork) => {
     setCartItems(prev => {
       const exists = prev.some(item => item.id === artwork.id);
-      if (exists) {
-        return prev.filter(item => item.id !== artwork.id);
-      } else {
-        return [...prev, artwork];
-      }
+      const updated = exists ? prev.filter(item => item.id !== artwork.id) : [...prev, artwork];
+      try {
+        localStorage.setItem("ziggurat_cart", JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
     });
   };
 
   const handleRemoveItem = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
+    setCartItems(prev => {
+      const updated = prev.filter(item => item.id !== id);
+      try {
+        localStorage.setItem("ziggurat_cart", JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   const scrollToGallery = () => {
