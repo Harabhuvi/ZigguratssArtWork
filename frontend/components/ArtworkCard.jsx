@@ -5,18 +5,24 @@ import { useState } from "react";
 
 export default function ArtworkCard({ artwork, onSelect, onAddToCart, isInCart }) {
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [tapped, setTapped] = useState(false);
 
   const getCategoryClass = (cat) => {
-    switch (cat) {
-      case "painting": return "tag-painting";
-      case "sculpture": return "tag-sculpture";
-      case "digital_art": return "tag-digital_art";
-      default: return "";
-    }
+    if (cat === "painting") return "tag-painting";
+    if (cat === "sculpture") return "tag-sculpture";
+    if (cat === "digital_art") return "tag-digital_art";
+    return "";
+  };
+
+  const handleCardTap = () => {
+    setTapped((prev) => !prev);
   };
 
   return (
-    <article className="artwork-card">
+    <article
+      className="artwork-card"
+      onClick={handleCardTap}
+    >
       <div className="artwork-image-wrap">
         <img
           src={artwork.image}
@@ -31,47 +37,50 @@ export default function ArtworkCard({ artwork, onSelect, onAddToCart, isInCart }
 
         <div style={{
           position: "absolute",
-          top: "16px",
-          left: "16px",
+          top: "12px",
+          left: "12px",
           display: "flex",
-          gap: "8px",
-          zIndex: 2
+          gap: "6px",
+          zIndex: 2,
+          flexWrap: "wrap"
         }}>
           <span className={`tag-badge ${getCategoryClass(artwork.category)}`}>
             {artwork.categoryLabel}
           </span>
           {artwork.featured && (
             <span style={{
-              fontSize: "0.72rem",
+              fontSize: "0.7rem",
               fontWeight: 700,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
               padding: "4px 10px",
               borderRadius: "999px",
               background: "rgba(226, 177, 112, 0.9)",
-              color: "#090a0f"
+              color: "#090a0f",
+              whiteSpace: "nowrap"
             }}>
               Curator Pick
             </span>
           )}
         </div>
 
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          background: "linear-gradient(to top, rgba(9, 10, 15, 0.95) 0%, rgba(9, 10, 15, 0.1) 60%, transparent 100%)",
-          opacity: 0,
-          transition: "opacity 0.3s ease",
-          display: "flex",
-          alignItems: "flex-end",
-          padding: "20px",
-          zIndex: 3
-        }}
-        className="card-hover-overlay"
+        <div
+          className="card-hover-overlay"
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(to top, rgba(9, 10, 15, 0.95) 0%, rgba(9, 10, 15, 0.1) 60%, transparent 100%)",
+            opacity: tapped ? 1 : 0,
+            transition: "opacity 0.25s ease",
+            display: "flex",
+            alignItems: "flex-end",
+            padding: "16px",
+            zIndex: 3
+          }}
         >
-          <div style={{ width: "100%", display: "flex", gap: "10px" }}>
+          <div style={{ width: "100%", display: "flex", gap: "8px" }}>
             <button
-              onClick={() => onSelect(artwork)}
+              onClick={(e) => { e.stopPropagation(); onSelect(artwork); }}
               style={{
                 flex: 1,
                 display: "flex",
@@ -85,27 +94,29 @@ export default function ArtworkCard({ artwork, onSelect, onAddToCart, isInCart }
                 color: "#fff",
                 fontSize: "0.84rem",
                 fontWeight: 600,
-                border: "1px solid rgba(255, 255, 255, 0.2)"
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                minHeight: "44px"
               }}
             >
               <Eye size={15} />
               Inspect
             </button>
             <button
-              onClick={() => onAddToCart(artwork)}
+              onClick={(e) => { e.stopPropagation(); onAddToCart(artwork); }}
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: "42px",
-                height: "42px",
+                width: "44px",
+                height: "44px",
                 borderRadius: "50%",
                 background: isInCart ? "var(--gold-primary)" : "rgba(226, 177, 112, 0.85)",
                 color: "#090a0f",
                 border: "none",
-                transition: "var(--transition)"
+                transition: "var(--transition)",
+                flexShrink: 0
               }}
-              title={isInCart ? "Already in acquisition list" : "Add to collection inquiry"}
+              title={isInCart ? "In acquisition list" : "Add to collection inquiry"}
             >
               {isInCart ? <Check size={18} /> : <ShoppingBag size={18} />}
             </button>
@@ -113,22 +124,22 @@ export default function ArtworkCard({ artwork, onSelect, onAddToCart, isInCart }
         </div>
       </div>
 
-      <div style={{ padding: "20px", display: "flex", flexDirection: "column", flex: 1, justifyContent: "space-between" }}>
+      <div style={{ padding: "clamp(14px, 2vw, 20px)", display: "flex", flexDirection: "column", flex: 1, justifyContent: "space-between" }}>
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
-            <h3 style={{ fontSize: "1.35rem", color: "#f8fafc", fontWeight: 500 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px", gap: "8px" }}>
+            <h3 style={{ fontSize: "clamp(1.1rem, 2.5vw, 1.35rem)", color: "#f8fafc", fontWeight: 500, lineHeight: "1.25" }}>
               {artwork.title}
             </h3>
-            <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>
+            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", flexShrink: 0 }}>
               {artwork.year}
             </span>
           </div>
 
-          <p style={{ fontSize: "0.88rem", color: "var(--gold-primary)", marginBottom: "8px", fontWeight: 500 }}>
+          <p style={{ fontSize: "0.88rem", color: "var(--gold-primary)", marginBottom: "6px", fontWeight: 500 }}>
             {artwork.artist}
           </p>
 
-          <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginBottom: "16px", lineHeight: "1.4" }}>
+          <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "14px", lineHeight: "1.4" }}>
             {artwork.medium}
           </p>
         </div>
@@ -137,30 +148,32 @@ export default function ArtworkCard({ artwork, onSelect, onAddToCart, isInCart }
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          paddingTop: "14px",
-          borderTop: "1px solid rgba(255, 255, 255, 0.06)"
+          paddingTop: "12px",
+          borderTop: "1px solid rgba(255, 255, 255, 0.06)",
+          gap: "8px"
         }}>
           <div>
-            <div style={{ fontSize: "0.72rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Acquisition Price
+            <div style={{ fontSize: "0.7rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "2px" }}>
+              Acquisition
             </div>
-            <div style={{ fontSize: "1.2rem", fontWeight: 600, color: "#fff" }}>
-              ${artwork.price.toLocaleString()} {artwork.currency}
+            <div style={{ fontSize: "clamp(1rem, 2vw, 1.2rem)", fontWeight: 600, color: "#fff" }}>
+              ${artwork.price.toLocaleString()}
             </div>
           </div>
 
           <button
-            onClick={() => onSelect(artwork)}
+            onClick={(e) => { e.stopPropagation(); onSelect(artwork); }}
             style={{
-              fontSize: "0.8rem",
+              fontSize: "0.78rem",
               color: "var(--gold-primary)",
               letterSpacing: "0.04em",
               textTransform: "uppercase",
               fontWeight: 600,
-              padding: "6px 0"
+              padding: "8px 0",
+              minHeight: "36px"
             }}
           >
-            Details &rarr;
+            Details →
           </button>
         </div>
       </div>

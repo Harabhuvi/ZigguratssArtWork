@@ -304,7 +304,7 @@ export default function HomePage() {
       />
 
       <main>
-        <section style={{ paddingTop: "95px", paddingBottom: "20px" }}>
+        <section style={{ paddingTop: "clamp(80px, 10vw, 105px)", paddingBottom: "16px" }}>
           <div className="container">
             <div style={{
               display: "flex",
@@ -314,60 +314,38 @@ export default function HomePage() {
               gap: "14px",
               marginBottom: "18px"
             }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                 <span className="tag-badge tag-painting">
                   <Sparkles size={13} />
                   Atelier Experience
                 </span>
-                <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)" }}>
-                  Select Interactive Experience:
-                </span>
               </div>
 
-              <div style={{
-                display: "flex",
-                background: "rgba(19, 23, 34, 0.8)",
-                border: "1px solid var(--border-subtle)",
-                borderRadius: "999px",
-                padding: "4px",
-                gap: "4px"
-              }}>
+              <div className="hero-mode-switcher">
                 <button
                   onClick={() => setHeroMode("3d_gallery")}
+                  className="hero-mode-btn"
                   style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "8px 18px",
-                    borderRadius: "999px",
-                    fontSize: "0.82rem",
                     fontWeight: heroMode === "3d_gallery" ? 600 : 400,
                     background: heroMode === "3d_gallery" ? "var(--gold-primary)" : "transparent",
-                    color: heroMode === "3d_gallery" ? "#090a0f" : "var(--text-secondary)",
-                    transition: "var(--transition)"
+                    color: heroMode === "3d_gallery" ? "#090a0f" : "var(--text-secondary)"
                   }}
                 >
                   <Box size={14} />
-                  3D Virtual Gallery Corridor
+                  <span>3D Gallery</span>
                 </button>
 
                 <button
                   onClick={() => setHeroMode("live_easel")}
+                  className="hero-mode-btn"
                   style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "8px 18px",
-                    borderRadius: "999px",
-                    fontSize: "0.82rem",
                     fontWeight: heroMode === "live_easel" ? 600 : 400,
                     background: heroMode === "live_easel" ? "var(--gold-primary)" : "transparent",
-                    color: heroMode === "live_easel" ? "#090a0f" : "var(--text-secondary)",
-                    transition: "var(--transition)"
+                    color: heroMode === "live_easel" ? "#090a0f" : "var(--text-secondary)"
                   }}
                 >
                   <Paintbrush size={14} />
-                  Live Easel Painter
+                  <span>Live Painter</span>
                 </button>
               </div>
             </div>
@@ -385,7 +363,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="gallery-section" style={{ paddingTop: "40px", paddingBottom: "80px" }}>
+        <section id="gallery-section" style={{ paddingTop: "clamp(32px, 5vw, 56px)", paddingBottom: "clamp(60px, 8vw, 100px)" }}>
           <div className="container">
             <div style={{ textAlign: "center", maxWidth: "640px", margin: "0 auto 40px auto" }}>
               <span className="tag-badge tag-painting" style={{ marginBottom: "12px" }}>
@@ -433,14 +411,7 @@ export default function HomePage() {
                 </button>
               </div>
             ) : (
-              <div 
-                className="artworks-responsive-grid"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-                  gap: "24px"
-                }}
-              >
+              <div className="artworks-grid">
                 {filteredArtworks.map((artwork) => (
                   <ArtworkCard
                     key={artwork.id}

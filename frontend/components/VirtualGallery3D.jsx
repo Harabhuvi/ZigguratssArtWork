@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import * as THREE from "three";
 import { Eye, ChevronLeft, ChevronRight, Play, Pause, Compass, ShoppingBag } from "lucide-react";
 
@@ -11,34 +11,35 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
   const [isAutoTour, setIsAutoTour] = useState(false);
   const [activeArtwork, setActiveArtwork] = useState(null);
   const [hoveredArt, setHoveredArt] = useState(null);
+  const [isMobileView, setIsMobileView] = useState(false);
 
   const stops = [
     {
-      name: "Gallery Grand Hall Entrance",
+      name: "Gallery Grand Hall",
       camPos: { x: 0, y: 2.2, z: 22 },
       camLook: { x: 0, y: 2.2, z: 0 },
       artIndex: null
     },
     {
-      name: "East Wing: Celestial Resonance",
+      name: "East Wing — Celestial Resonance",
       camPos: { x: 2.8, y: 2.4, z: 14.5 },
       camLook: { x: 5.8, y: 2.5, z: 14.5 },
       artIndex: 0
     },
     {
-      name: "West Wing: Fractured Monolith IV & Bust",
+      name: "West Wing — Fractured Monolith",
       camPos: { x: -2.8, y: 2.3, z: 9 },
       camLook: { x: -5.8, y: 2.4, z: 9 },
       artIndex: 1
     },
     {
-      name: "Central Salon: Hyper-Synthetic Dreamscape",
+      name: "Central Salon — Dreamscape",
       camPos: { x: 2.6, y: 2.4, z: 3.5 },
       camLook: { x: 5.8, y: 2.4, z: 3.5 },
       artIndex: 2
     },
     {
-      name: "Atelier Centerpiece: Nocturne in Ochre & Zinc",
+      name: "Atelier Centerpiece",
       camPos: { x: 0, y: 2.3, z: -4 },
       camLook: { x: 0, y: 2.3, z: -11 },
       artIndex: 3
@@ -59,6 +60,31 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
     isAutoTourRef.current = isAutoTour;
   }, [isAutoTour]);
 
+  const setStopIndex = useCallback((index) => {
+    setCurrentStop(index);
+    const stop = stops[index];
+    targetCamPosRef.current.set(stop.camPos.x, stop.camPos.y, stop.camPos.z);
+    targetCamLookRef.current.set(stop.camLook.x, stop.camLook.y, stop.camLook.z);
+    setActiveArtwork(stop.artIndex !== null ? artworks[stop.artIndex] : null);
+  }, [artworks]);
+
+  const goToNextStop = useCallback(() => {
+    const next = (currentStopRef.current + 1) % stops.length;
+    setStopIndex(next);
+  }, [setStopIndex]);
+
+  const goToPrevStop = useCallback(() => {
+    const prev = (currentStopRef.current - 1 + stops.length) % stops.length;
+    setStopIndex(prev);
+  }, [setStopIndex]);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobileView(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   useEffect(() => {
     const container = containerRef.current;
     const canvas = canvasRef.current;
@@ -69,9 +95,9 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0e0f14);
-    scene.fog = new THREE.FogExp2(0x0e0f14, 0.022);
+    scene.fog = new THREE.FogExp2(0x0e0f14, 0.02);
 
-    const camera = new THREE.PerspectiveCamera(52, width / height, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 100);
     camera.position.set(0, 2.2, 22);
 
     const renderer = new THREE.WebGLRenderer({
@@ -84,10 +110,10 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    const ambientLight = new THREE.AmbientLight(0xffeedd, 0.55);
+    const ambientLight = new THREE.AmbientLight(0xffeedd, 0.6);
     scene.add(ambientLight);
 
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x111218, 0.35);
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x111218, 0.4);
     scene.add(hemiLight);
 
     const corridorLength = 46;
@@ -95,11 +121,7 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
     const corridorHeight = 6;
 
     const floorGeo = new THREE.PlaneGeometry(corridorWidth, corridorLength);
-    const floorMat = new THREE.MeshStandardMaterial({
-      color: 0x14161f,
-      roughness: 0.28,
-      metalness: 0.15
-    });
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x14161f, roughness: 0.28, metalness: 0.15 });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(0, 0, 5);
@@ -107,50 +129,38 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
     scene.add(floor);
 
     const ceilGeo = new THREE.PlaneGeometry(corridorWidth, corridorLength);
-    const ceilMat = new THREE.MeshStandardMaterial({
-      color: 0x181a24,
-      roughness: 0.8
-    });
+    const ceilMat = new THREE.MeshStandardMaterial({ color: 0x181a24, roughness: 0.8 });
     const ceil = new THREE.Mesh(ceilGeo, ceilMat);
     ceil.rotation.x = Math.PI / 2;
     ceil.position.set(0, corridorHeight, 5);
     scene.add(ceil);
 
     const stripMat = new THREE.MeshBasicMaterial({ color: 0xfff6dd });
-    const stripGeo = new THREE.PlaneGeometry(0.24, corridorLength);
-
-    const leftStrip = new THREE.Mesh(stripGeo, stripMat);
+    const leftStrip = new THREE.Mesh(new THREE.PlaneGeometry(0.24, corridorLength), stripMat);
     leftStrip.rotation.x = Math.PI / 2;
     leftStrip.position.set(-2.8, corridorHeight - 0.02, 5);
     scene.add(leftStrip);
 
-    const rightStrip = new THREE.Mesh(stripGeo, stripMat);
+    const rightStrip = new THREE.Mesh(new THREE.PlaneGeometry(0.24, corridorLength), stripMat);
     rightStrip.rotation.x = Math.PI / 2;
     rightStrip.position.set(2.8, corridorHeight - 0.02, 5);
     scene.add(rightStrip);
 
-    const wallMat = new THREE.MeshStandardMaterial({
-      color: 0xdedcd6,
-      roughness: 0.88,
-      metalness: 0.02
-    });
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0xdedcd6, roughness: 0.88, metalness: 0.02 });
 
-    const leftWallGeo = new THREE.PlaneGeometry(corridorLength, corridorHeight);
-    const leftWall = new THREE.Mesh(leftWallGeo, wallMat);
+    const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(corridorLength, corridorHeight), wallMat);
     leftWall.rotation.y = Math.PI / 2;
     leftWall.position.set(-corridorWidth / 2, corridorHeight / 2, 5);
     leftWall.receiveShadow = true;
     scene.add(leftWall);
 
-    const rightWallGeo = new THREE.PlaneGeometry(corridorLength, corridorHeight);
-    const rightWall = new THREE.Mesh(rightWallGeo, wallMat);
+    const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(corridorLength, corridorHeight), wallMat);
     rightWall.rotation.y = -Math.PI / 2;
     rightWall.position.set(corridorWidth / 2, corridorHeight / 2, 5);
     rightWall.receiveShadow = true;
     scene.add(rightWall);
 
-    const backWallGeo = new THREE.PlaneGeometry(corridorWidth, corridorHeight);
-    const backWall = new THREE.Mesh(backWallGeo, wallMat);
+    const backWall = new THREE.Mesh(new THREE.PlaneGeometry(corridorWidth, corridorHeight), wallMat);
     backWall.position.set(0, corridorHeight / 2, -corridorLength / 2 + 5);
     backWall.receiveShadow = true;
     scene.add(backWall);
@@ -159,144 +169,78 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
     const artworkMeshes = [];
 
     const artworkPlacements = [
-      {
-        art: artworks[0],
-        pos: [corridorWidth / 2 - 0.05, 2.8, 14.5],
-        rot: [0, -Math.PI / 2, 0],
-        size: [3.4, 2.6]
-      },
-      {
-        art: artworks[1],
-        pos: [-corridorWidth / 2 + 0.05, 2.8, 9],
-        rot: [0, Math.PI / 2, 0],
-        size: [3.2, 2.5]
-      },
-      {
-        art: artworks[2],
-        pos: [corridorWidth / 2 - 0.05, 2.8, 3.5],
-        rot: [0, -Math.PI / 2, 0],
-        size: [3.4, 2.6]
-      },
-      {
-        art: artworks[3] || artworks[0],
-        pos: [0, 2.8, -corridorLength / 2 + 5.08],
-        rot: [0, 0, 0],
-        size: [4.2, 3.2]
-      }
+      { art: artworks[0], pos: [corridorWidth / 2 - 0.05, 2.8, 14.5], rot: [0, -Math.PI / 2, 0], size: [3.4, 2.6] },
+      { art: artworks[1], pos: [-corridorWidth / 2 + 0.05, 2.8, 9], rot: [0, Math.PI / 2, 0], size: [3.2, 2.5] },
+      { art: artworks[2], pos: [corridorWidth / 2 - 0.05, 2.8, 3.5], rot: [0, -Math.PI / 2, 0], size: [3.4, 2.6] },
+      { art: artworks[3] || artworks[0], pos: [0, 2.8, -corridorLength / 2 + 5.08], rot: [0, 0, 0], size: [4.2, 3.2] }
     ];
 
-    artworkPlacements.forEach((item, idx) => {
+    artworkPlacements.forEach((item) => {
+      if (!item.art) return;
       const group = new THREE.Group();
       group.position.set(...item.pos);
       group.rotation.set(...item.rot);
 
-      const frameGeo = new THREE.BoxGeometry(item.size[0] + 0.35, item.size[1] + 0.35, 0.12);
-      const frameMat = new THREE.MeshStandardMaterial({ color: 0x111215, roughness: 0.3, metalness: 0.3 });
-      const frame = new THREE.Mesh(frameGeo, frameMat);
+      const frame = new THREE.Mesh(
+        new THREE.BoxGeometry(item.size[0] + 0.35, item.size[1] + 0.35, 0.12),
+        new THREE.MeshStandardMaterial({ color: 0x111215, roughness: 0.3, metalness: 0.3 })
+      );
       frame.castShadow = true;
       group.add(frame);
 
-      const mattingGeo = new THREE.PlaneGeometry(item.size[0] + 0.14, item.size[1] + 0.14);
-      const mattingMat = new THREE.MeshStandardMaterial({ color: 0xf6f6f4, roughness: 0.9 });
-      const matting = new THREE.Mesh(mattingGeo, mattingMat);
+      const matting = new THREE.Mesh(
+        new THREE.PlaneGeometry(item.size[0] + 0.14, item.size[1] + 0.14),
+        new THREE.MeshStandardMaterial({ color: 0xf6f6f4, roughness: 0.9 })
+      );
       matting.position.z = 0.065;
       group.add(matting);
 
-      const canvasGeo = new THREE.PlaneGeometry(item.size[0], item.size[1]);
-      const artTex = textureLoader.load(item.art.image);
-      artTex.colorSpace = THREE.SRGBColorSpace;
-      const canvasMat = new THREE.MeshStandardMaterial({
-        map: artTex,
-        roughness: 0.4
-      });
-      const artMesh = new THREE.Mesh(canvasGeo, canvasMat);
-      artMesh.position.z = 0.07;
-      artMesh.userData = { artwork: item.art, index: idx };
-      group.add(artMesh);
-      artworkMeshes.push(artMesh);
+      const placeholder = new THREE.Mesh(
+        new THREE.PlaneGeometry(item.size[0], item.size[1]),
+        new THREE.MeshStandardMaterial({ color: 0x1a1c26, roughness: 0.9 })
+      );
+      placeholder.position.z = 0.07;
+      group.add(placeholder);
 
-      const spot = new THREE.SpotLight(0xfffaee, 4.5, 9, Math.PI / 4, 0.45, 1.2);
-      spot.position.set(0, 2.2, 1.8);
-      spot.target = artMesh;
-      group.add(spot);
-      group.add(spot.target);
+      const spotIntensity = 3.2;
+      const spotLight = new THREE.SpotLight(0xfff5e0, spotIntensity, 12, Math.PI / 7, 0.4);
+      spotLight.position.set(0, 4.5, 2.5);
+      spotLight.target = frame;
+      spotLight.castShadow = true;
+      group.add(spotLight);
+      group.add(spotLight.target);
 
-      const bulbGeo = new THREE.CylinderGeometry(0.1, 0.15, 0.25, 16);
-      const bulbMat = new THREE.MeshStandardMaterial({ color: 0x22242e });
-      const bulb = new THREE.Mesh(bulbGeo, bulbMat);
-      bulb.position.set(0, 2.2, 1.8);
-      bulb.rotation.x = Math.PI / 4;
-      group.add(bulb);
-
+      group.userData.artwork = item.art;
+      artworkMeshes.push(group);
       scene.add(group);
+
+      if (item.art.image) {
+        textureLoader.load(item.art.image, (tex) => {
+          tex.colorSpace = THREE.SRGBColorSpace;
+          placeholder.material = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.85 });
+        });
+      }
     });
-
-    const pedestalGeo = new THREE.BoxGeometry(1.2, 1.3, 1.2);
-    const pedestalMat = new THREE.MeshStandardMaterial({ color: 0x12141c, roughness: 0.35 });
-    const pedestal = new THREE.Mesh(pedestalGeo, pedestalMat);
-    pedestal.position.set(-3.2, 0.65, 9);
-    pedestal.castShadow = true;
-    pedestal.receiveShadow = true;
-    scene.add(pedestal);
-
-    const bustGroup = new THREE.Group();
-    bustGroup.position.set(-3.2, 1.3, 9);
-
-    const bustMat = new THREE.MeshStandardMaterial({
-      color: 0xf5f3ee,
-      roughness: 0.3,
-      metalness: 0.1
-    });
-
-    const headGeo = new THREE.SphereGeometry(0.28, 24, 24);
-    const head = new THREE.Mesh(headGeo, bustMat);
-    head.position.y = 0.55;
-    head.scale.set(0.85, 1.15, 0.95);
-    bustGroup.add(head);
-
-    const torsoGeo = new THREE.CylinderGeometry(0.18, 0.38, 0.45, 20);
-    const torso = new THREE.Mesh(torsoGeo, bustMat);
-    torso.position.y = 0.22;
-    bustGroup.add(torso);
-
-    const basePedGeo = new THREE.CylinderGeometry(0.25, 0.3, 0.08, 20);
-    const basePed = new THREE.Mesh(basePedGeo, bustMat);
-    bustGroup.add(basePed);
-
-    bustGroup.userData = { artwork: artworks[1] || artworks[0], isBust: true };
-    scene.add(bustGroup);
-    artworkMeshes.push(head);
 
     const createVisitorFigure = (x, z, rotY) => {
-      const fig = new THREE.Group();
-      fig.position.set(x, 0, z);
-      fig.rotation.y = rotY;
+      const group = new THREE.Group();
+      group.position.set(x, 0, z);
+      group.rotation.y = rotY;
 
-      const clothMat = new THREE.MeshStandardMaterial({ color: 0x1e222d, roughness: 0.8 });
-      const skinMat = new THREE.MeshStandardMaterial({ color: 0xc89d7c, roughness: 0.6 });
+      const bodyGeo = new THREE.CylinderGeometry(0.22, 0.28, 1.55, 8);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1c1e28, roughness: 0.8 });
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      body.position.y = 0.78;
+      body.castShadow = true;
+      group.add(body);
 
-      const legsGeo = new THREE.CylinderGeometry(0.14, 0.16, 0.9, 12);
-      const legs = new THREE.Mesh(legsGeo, clothMat);
-      legs.position.y = 0.45;
-      fig.add(legs);
+      const headGeo = new THREE.SphereGeometry(0.2, 10, 10);
+      const head = new THREE.Mesh(headGeo, bodyMat);
+      head.position.y = 1.72;
+      head.castShadow = true;
+      group.add(head);
 
-      const coatGeo = new THREE.CylinderGeometry(0.22, 0.28, 0.85, 14);
-      const coat = new THREE.Mesh(coatGeo, clothMat);
-      coat.position.y = 1.15;
-      fig.add(coat);
-
-      const fHeadGeo = new THREE.SphereGeometry(0.13, 16, 16);
-      const fHead = new THREE.Mesh(fHeadGeo, skinMat);
-      fHead.position.y = 1.68;
-      fig.add(fHead);
-
-      const hairGeo = new THREE.SphereGeometry(0.14, 16, 16);
-      const hairMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
-      const hair = new THREE.Mesh(hairGeo, hairMat);
-      hair.position.set(0, 1.72, -0.02);
-      fig.add(hair);
-
-      scene.add(fig);
+      scene.add(group);
     };
 
     createVisitorFigure(3.2, 14.8, -Math.PI / 2.2);
@@ -348,9 +292,11 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
       }
     };
 
+    let lastWheelTime = 0;
     const handleWheel = (e) => {
-      e.preventDefault();
-      if (Math.abs(e.deltaY) > 20) {
+      const now = Date.now();
+      if (Math.abs(e.deltaY) > 60 && now - lastWheelTime > 800) {
+        lastWheelTime = now;
         if (e.deltaY > 0) {
           goToNextStop();
         } else {
@@ -359,18 +305,21 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
       }
     };
 
+    let touchStartX = 0;
     let touchStartY = 0;
     const handleTouchStart = (e) => {
       if (e.touches.length > 0) {
+        touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
       }
     };
 
     const handleTouchEnd = (e) => {
       if (e.changedTouches.length > 0) {
-        const delta = touchStartY - e.changedTouches[0].clientY;
-        if (Math.abs(delta) > 35) {
-          if (delta > 0) {
+        const dx = touchStartX - e.changedTouches[0].clientX;
+        const dy = touchStartY - e.changedTouches[0].clientY;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+          if (dx > 0) {
             goToNextStop();
           } else {
             goToPrevStop();
@@ -379,11 +328,17 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
       }
     };
 
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") goToNextStop();
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") goToPrevStop();
+    };
+
     canvas.addEventListener("pointermove", handlePointerMove);
     canvas.addEventListener("click", handlePointerClick);
-    canvas.addEventListener("wheel", handleWheel, { passive: false });
+    canvas.addEventListener("wheel", handleWheel, { passive: true });
     canvas.addEventListener("touchstart", handleTouchStart, { passive: true });
     canvas.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("keydown", handleKeyDown);
 
     const handleResize = () => {
       if (!container) return;
@@ -404,15 +359,15 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
 
       if (isAutoTourRef.current) {
         const now = Date.now();
-        if (now - lastAutoTime > 5500) {
+        if (now - lastAutoTime > 5000) {
           lastAutoTime = now;
           const next = (currentStopRef.current + 1) % stops.length;
           setStopIndex(next);
         }
       }
 
-      camera.position.lerp(targetCamPosRef.current, 0.045);
-      currentCamLookRef.current.lerp(targetCamLookRef.current, 0.045);
+      camera.position.lerp(targetCamPosRef.current, 0.065);
+      currentCamLookRef.current.lerp(targetCamLookRef.current, 0.065);
       camera.lookAt(currentCamLookRef.current);
 
       renderer.render(scene, camera);
@@ -423,6 +378,7 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("keydown", handleKeyDown);
       canvas.removeEventListener("pointermove", handlePointerMove);
       canvas.removeEventListener("click", handlePointerClick);
       canvas.removeEventListener("wheel", handleWheel);
@@ -430,62 +386,46 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
       canvas.removeEventListener("touchend", handleTouchEnd);
       renderer.dispose();
     };
-  }, [artworks]);
-
-  const setStopIndex = (index) => {
-    setCurrentStop(index);
-    const stop = stops[index];
-    targetCamPosRef.current.set(stop.camPos.x, stop.camPos.y, stop.camPos.z);
-    targetCamLookRef.current.set(stop.camLook.x, stop.camLook.y, stop.camLook.z);
-    setActiveArtwork(stop.artIndex !== null ? artworks[stop.artIndex] : null);
-  };
-
-  const goToNextStop = () => {
-    const next = (currentStop + 1) % stops.length;
-    setStopIndex(next);
-  };
-
-  const goToPrevStop = () => {
-    const prev = (currentStop - 1 + stops.length) % stops.length;
-    setStopIndex(prev);
-  };
+  }, [artworks, goToNextStop, goToPrevStop, setStopIndex]);
 
   const currentStopData = stops[currentStop];
   const spotlightArt = activeArtwork || (currentStopData.artIndex !== null ? artworks[currentStopData.artIndex] : null);
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       style={{
         position: "relative",
         width: "100%",
-        height: "88vh",
-        minHeight: "600px",
+        height: isMobileView ? "65vw" : "82vh",
+        minHeight: isMobileView ? "320px" : "520px",
+        maxHeight: "860px",
         overflow: "hidden",
-        borderRadius: "24px",
+        borderRadius: "clamp(14px, 3vw, 24px)",
         border: "1px solid var(--border-subtle)",
         background: "#0a0b10",
         boxShadow: "0 25px 70px -10px rgba(0, 0, 0, 0.95)"
       }}
     >
-      <canvas 
-        ref={canvasRef} 
+      <canvas
+        ref={canvasRef}
         style={{
           width: "100%",
           height: "100%",
-          display: "block"
+          display: "block",
+          touchAction: "pan-y"
         }}
       />
 
       <div
         style={{
           position: "absolute",
-          top: "24px",
-          left: "24px",
+          top: "16px",
+          left: "16px",
           zIndex: 10,
           display: "flex",
           alignItems: "center",
-          gap: "12px"
+          gap: "10px"
         }}
       >
         <div style={{
@@ -493,31 +433,33 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
           backdropFilter: "blur(14px)",
           border: "1px solid var(--border-active)",
           borderRadius: "999px",
-          padding: "8px 20px",
+          padding: "7px 16px",
           display: "flex",
           alignItems: "center",
-          gap: "10px",
+          gap: "8px",
           boxShadow: "0 6px 20px rgba(0,0,0,0.6)"
         }}>
-          <Compass size={16} color="var(--gold-primary)" />
-          <span style={{ fontSize: "0.85rem", color: "#fff", fontWeight: 600, letterSpacing: "0.04em" }}>
-            3D Virtual Gallery Tour
+          <Compass size={14} color="var(--gold-primary)" />
+          <span style={{ fontSize: "clamp(0.72rem, 2vw, 0.84rem)", color: "#fff", fontWeight: 600 }}>
+            {isMobileView ? `${currentStop + 1}/${stops.length}` : currentStopData.name}
           </span>
-          <span style={{ fontSize: "0.74rem", color: "var(--gold-primary)", paddingLeft: "4px" }}>
-            Hall {currentStop + 1} / {stops.length}
-          </span>
+          {!isMobileView && (
+            <span style={{ fontSize: "0.72rem", color: "var(--gold-primary)", paddingLeft: "4px" }}>
+              {currentStop + 1} / {stops.length}
+            </span>
+          )}
         </div>
       </div>
 
       <div
         style={{
           position: "absolute",
-          top: "24px",
-          right: "24px",
+          top: "16px",
+          right: "16px",
           zIndex: 10,
           display: "flex",
           alignItems: "center",
-          gap: "10px"
+          gap: "8px"
         }}
       >
         <button
@@ -525,20 +467,21 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: "8px",
+            gap: "6px",
             background: isAutoTour ? "var(--gold-primary)" : "rgba(9, 10, 15, 0.88)",
             color: isAutoTour ? "#090a0f" : "#fff",
             border: isAutoTour ? "none" : "1px solid var(--border-subtle)",
             borderRadius: "999px",
-            padding: "8px 18px",
-            fontSize: "0.82rem",
+            padding: "7px 14px",
+            fontSize: "clamp(0.72rem, 2vw, 0.82rem)",
             fontWeight: 600,
             backdropFilter: "blur(12px)",
-            transition: "var(--transition)"
+            transition: "var(--transition)",
+            minHeight: "36px"
           }}
         >
-          {isAutoTour ? <Pause size={15} /> : <Play size={15} />}
-          <span>{isAutoTour ? "Pause Tour" : "Auto Walkthrough"}</span>
+          {isAutoTour ? <Pause size={14} /> : <Play size={14} />}
+          {!isMobileView && <span>{isAutoTour ? "Pause" : "Auto Tour"}</span>}
         </button>
       </div>
 
@@ -546,80 +489,79 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
         <div
           style={{
             position: "absolute",
-            bottom: "100px",
+            bottom: "90px",
             left: "50%",
             transform: "translateX(-50%)",
             background: "rgba(9, 10, 15, 0.92)",
             backdropFilter: "blur(16px)",
             border: "1px solid var(--gold-primary)",
-            borderRadius: "14px",
-            padding: "10px 22px",
+            borderRadius: "12px",
+            padding: "8px 18px",
             display: "flex",
             alignItems: "center",
-            gap: "12px",
+            gap: "10px",
             zIndex: 20,
             boxShadow: "0 10px 30px rgba(0,0,0,0.8)",
-            pointerEvents: "none"
+            pointerEvents: "none",
+            whiteSpace: "nowrap"
           }}
         >
-          <Eye size={16} color="var(--gold-primary)" />
+          <Eye size={14} color="var(--gold-primary)" />
           <div>
-            <div style={{ fontSize: "0.86rem", color: "#fff", fontWeight: 600 }}>{hoveredArt.title}</div>
-            <div style={{ fontSize: "0.75rem", color: "var(--gold-primary)" }}>{hoveredArt.artist} &bull; ${hoveredArt.price.toLocaleString()}</div>
+            <div style={{ fontSize: "0.84rem", color: "#fff", fontWeight: 600 }}>{hoveredArt.title}</div>
+            <div style={{ fontSize: "0.73rem", color: "var(--gold-primary)" }}>${hoveredArt.price.toLocaleString()}</div>
           </div>
-          <span style={{ fontSize: "0.74rem", color: "var(--text-muted)", paddingLeft: "8px" }}>Click to Inspect</span>
+          <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", paddingLeft: "6px" }}>Click to view</span>
         </div>
       )}
 
       {spotlightArt && (
         <div
-          className="gallery-spotlight-card"
           style={{
             position: "absolute",
-            bottom: "24px",
-            left: "24px",
+            bottom: "16px",
+            left: "16px",
             zIndex: 10,
             background: "rgba(9, 10, 15, 0.9)",
             backdropFilter: "blur(18px)",
             border: "1px solid var(--border-active)",
-            borderRadius: "16px",
-            padding: "18px 24px",
-            maxWidth: "420px",
+            borderRadius: "14px",
+            padding: isMobileView ? "12px 16px" : "16px 22px",
+            maxWidth: isMobileView ? "calc(100% - 100px)" : "380px",
             boxShadow: "0 15px 40px rgba(0,0,0,0.7)"
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-            <span className={`tag-badge tag-${spotlightArt.category}`} style={{ fontSize: "0.7rem", padding: "2px 8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
+            <span className={`tag-badge tag-${spotlightArt.category}`} style={{ fontSize: "0.68rem", padding: "2px 8px" }}>
               {spotlightArt.categoryLabel}
             </span>
-            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{spotlightArt.year}</span>
+            <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>{spotlightArt.year}</span>
           </div>
 
-          <h3 style={{ fontSize: "1.3rem", color: "#fff", lineHeight: "1.2", marginBottom: "4px" }}>
+          <h3 style={{ fontSize: isMobileView ? "1rem" : "1.2rem", color: "#fff", lineHeight: "1.2", marginBottom: "4px" }}>
             {spotlightArt.title}
           </h3>
 
-          <p style={{ fontSize: "0.85rem", color: "var(--gold-primary)", marginBottom: "14px", fontWeight: 500 }}>
+          <p style={{ fontSize: "0.82rem", color: "var(--gold-primary)", marginBottom: "12px", fontWeight: 500 }}>
             {spotlightArt.artist} &bull; <span style={{ color: "#fff", fontWeight: 600 }}>${spotlightArt.price.toLocaleString()}</span>
           </p>
 
-          <div style={{ display: "flex", gap: "10px" }}>
+          <div style={{ display: "flex", gap: "8px" }}>
             <button
               onClick={() => onSelectArtwork(spotlightArt)}
               className="btn-gold"
-              style={{ padding: "8px 18px", fontSize: "0.82rem" }}
+              style={{ padding: "7px 16px", fontSize: "0.78rem", minHeight: "36px" }}
             >
-              <Eye size={14} />
-              Inspect Piece
+              <Eye size={13} />
+              View
             </button>
             <button
               onClick={() => onAddToCart(spotlightArt)}
               className="btn-secondary"
-              style={{ padding: "8px 14px", fontSize: "0.82rem" }}
-              title="Add to Acquisition Inquiry"
+              style={{ padding: "7px 12px", fontSize: "0.78rem", minHeight: "36px" }}
             >
-              <ShoppingBag size={14} />
-              {isInCart ? "In Portfolio" : "Acquire"}
+              <ShoppingBag size={13} />
+              {isInCart ? "Added" : "Acquire"}
             </button>
           </div>
         </div>
@@ -628,20 +570,20 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
       <div
         style={{
           position: "absolute",
-          bottom: "24px",
-          right: "24px",
+          bottom: "16px",
+          right: "16px",
           zIndex: 10,
           display: "flex",
           alignItems: "center",
-          gap: "10px"
+          gap: "8px"
         }}
       >
         <button
           onClick={goToPrevStop}
-          aria-label="Previous Artwork Wing"
+          aria-label="Previous wing"
           style={{
-            width: "44px",
-            height: "44px",
+            width: "40px",
+            height: "40px",
             borderRadius: "50%",
             background: "rgba(9, 10, 15, 0.88)",
             border: "1px solid var(--border-subtle)",
@@ -653,14 +595,14 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
             transition: "var(--transition)"
           }}
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft size={18} />
         </button>
 
         <div style={{
           display: "flex",
-          gap: "6px",
+          gap: "5px",
           background: "rgba(9, 10, 15, 0.85)",
-          padding: "8px 12px",
+          padding: "7px 10px",
           borderRadius: "999px",
           border: "1px solid var(--border-subtle)",
           backdropFilter: "blur(12px)"
@@ -670,23 +612,23 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
               key={idx}
               onClick={() => setStopIndex(idx)}
               style={{
-                width: currentStop === idx ? "20px" : "8px",
-                height: "8px",
+                width: currentStop === idx ? "18px" : "7px",
+                height: "7px",
                 borderRadius: "999px",
-                background: currentStop === idx ? "var(--gold-primary)" : "rgba(255, 255, 255, 0.25)",
+                background: currentStop === idx ? "var(--gold-primary)" : "rgba(255, 255, 255, 0.22)",
                 transition: "all 0.3s ease"
               }}
-              aria-label={`Jump to Gallery Stop ${idx + 1}`}
+              aria-label={`Go to stop ${idx + 1}`}
             />
           ))}
         </div>
 
         <button
           onClick={goToNextStop}
-          aria-label="Next Artwork Wing"
+          aria-label="Next wing"
           style={{
-            width: "44px",
-            height: "44px",
+            width: "40px",
+            height: "40px",
             borderRadius: "50%",
             background: "rgba(9, 10, 15, 0.88)",
             border: "1px solid var(--border-subtle)",
@@ -698,19 +640,26 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
             transition: "var(--transition)"
           }}
         >
-          <ChevronRight size={20} />
+          <ChevronRight size={18} />
         </button>
       </div>
 
-      <style jsx>{`
-        @media (max-width: 640px) {
-          .gallery-spotlight-card {
-            max-width: calc(100% - 48px) !important;
-            bottom: 80px !important;
-            padding: 14px 18px !important;
-          }
-        }
-      `}</style>
+      {!isMobileView && (
+        <div style={{
+          position: "absolute",
+          bottom: "60px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          fontSize: "0.7rem",
+          color: "rgba(255,255,255,0.25)",
+          letterSpacing: "0.08em",
+          pointerEvents: "none",
+          textTransform: "uppercase",
+          whiteSpace: "nowrap"
+        }}>
+          ← → arrows or swipe to navigate
+        </div>
+      )}
     </div>
   );
 }
