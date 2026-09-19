@@ -3,12 +3,13 @@
 import { useState, useEffect, useMemo } from "react";
 import Navbar from "../components/Navbar";
 import PaintingCanvasHero from "../components/PaintingCanvasHero";
+import VirtualGallery3D from "../components/VirtualGallery3D";
 import CategoryFilter from "../components/CategoryFilter";
 import ArtworkCard from "../components/ArtworkCard";
 import ArtworkModal from "../components/ArtworkModal";
 import CartDrawer from "../components/CartDrawer";
 import Footer from "../components/Footer";
-import { Sparkles, Award, ShieldCheck, Compass } from "lucide-react";
+import { Sparkles, Award, ShieldCheck, Compass, Box, Paintbrush } from "lucide-react";
 
 const fallbackArtworks = [
   {
@@ -211,6 +212,7 @@ export default function HomePage() {
   const [selectedArtwork, setSelectedArtwork] = useState(null);
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [heroMode, setHeroMode] = useState("3d_gallery");
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -302,7 +304,86 @@ export default function HomePage() {
       />
 
       <main>
-        <PaintingCanvasHero onExploreArt={scrollToGallery} />
+        <section style={{ paddingTop: "95px", paddingBottom: "20px" }}>
+          <div className="container">
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "14px",
+              marginBottom: "18px"
+            }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                <span className="tag-badge tag-painting">
+                  <Sparkles size={13} />
+                  Atelier Experience
+                </span>
+                <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)" }}>
+                  Select Interactive Experience:
+                </span>
+              </div>
+
+              <div style={{
+                display: "flex",
+                background: "rgba(19, 23, 34, 0.8)",
+                border: "1px solid var(--border-subtle)",
+                borderRadius: "999px",
+                padding: "4px",
+                gap: "4px"
+              }}>
+                <button
+                  onClick={() => setHeroMode("3d_gallery")}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 18px",
+                    borderRadius: "999px",
+                    fontSize: "0.82rem",
+                    fontWeight: heroMode === "3d_gallery" ? 600 : 400,
+                    background: heroMode === "3d_gallery" ? "var(--gold-primary)" : "transparent",
+                    color: heroMode === "3d_gallery" ? "#090a0f" : "var(--text-secondary)",
+                    transition: "var(--transition)"
+                  }}
+                >
+                  <Box size={14} />
+                  3D Virtual Gallery Corridor
+                </button>
+
+                <button
+                  onClick={() => setHeroMode("live_easel")}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 18px",
+                    borderRadius: "999px",
+                    fontSize: "0.82rem",
+                    fontWeight: heroMode === "live_easel" ? 600 : 400,
+                    background: heroMode === "live_easel" ? "var(--gold-primary)" : "transparent",
+                    color: heroMode === "live_easel" ? "#090a0f" : "var(--text-secondary)",
+                    transition: "var(--transition)"
+                  }}
+                >
+                  <Paintbrush size={14} />
+                  Live Easel Painter
+                </button>
+              </div>
+            </div>
+
+            {heroMode === "3d_gallery" ? (
+              <VirtualGallery3D
+                artworks={artworks}
+                onSelectArtwork={setSelectedArtwork}
+                onAddToCart={handleAddToCart}
+                isInCart={selectedArtwork ? cartItems.some(i => i.id === selectedArtwork.id) : false}
+              />
+            ) : (
+              <PaintingCanvasHero onExploreArt={scrollToGallery} />
+            )}
+          </div>
+        </section>
 
         <section id="gallery-section" style={{ paddingTop: "40px", paddingBottom: "80px" }}>
           <div className="container">
