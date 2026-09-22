@@ -3,16 +3,14 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "../components/Navbar";
-import PaintingCanvasHero from "../components/PaintingCanvasHero";
-import VirtualGallery3D from "../components/VirtualGallery3D";
 import CategoryFilter from "../components/CategoryFilter";
 import ArtworkCard from "../components/ArtworkCard";
 import ArtworkModal from "../components/ArtworkModal";
 import CartDrawer from "../components/CartDrawer";
 import Footer from "../components/Footer";
-import { Sparkles, Award, ShieldCheck, Compass, Box, Paintbrush } from "lucide-react";
+import { Sparkles, Award, ShieldCheck, Compass, Truck, Lock } from "lucide-react";
 
-const fallbackArtworks = [
+const curatedArtworks = [
   {
     id: "art-01",
     title: "Celestial Resonance",
@@ -28,7 +26,7 @@ const fallbackArtworks = [
     currency: "USD",
     inStock: true,
     featured: true,
-    image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=1200&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=1600&auto=format&fit=crop",
     description: "An evocative study in layered ultramarine and radiant gold pigments, capturing the transient luminescence of dawn over abstract horizons.",
     provenance: "Acquired directly from the artist's studio in Lyon, France.",
     certificate: true,
@@ -49,7 +47,7 @@ const fallbackArtworks = [
     currency: "USD",
     inStock: true,
     featured: true,
-    image: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=1200&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=1600&auto=format&fit=crop",
     description: "A monumental juxtaposition of polished dark marble and textured patinated bronze exploring geological time and urban fragmentation.",
     provenance: "Exhibited at Biennale di Scultura 2023, Venice.",
     certificate: true,
@@ -70,7 +68,7 @@ const fallbackArtworks = [
     currency: "USD",
     inStock: true,
     featured: true,
-    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1600&auto=format&fit=crop",
     description: "Multi-layered fluid neural simulation depicting organic topologies folding into holographic quantum lattice structures.",
     provenance: "Minted on private smart contract with 1/1 Museum Archival Dibond Print.",
     certificate: true,
@@ -91,7 +89,7 @@ const fallbackArtworks = [
     currency: "USD",
     inStock: true,
     featured: false,
-    image: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=1200&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=1600&auto=format&fit=crop",
     description: "Tactile impasto textures meet warm earth tones, invoking silent nocturnal spaces and the raw materiality of mineral pigments.",
     provenance: "Private collection, Zurich.",
     certificate: true,
@@ -112,7 +110,7 @@ const fallbackArtworks = [
     currency: "USD",
     inStock: true,
     featured: true,
-    image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=1200&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=1600&auto=format&fit=crop",
     description: "Flowing organic curves carved from pristine white marble that appear weightless despite their dense stone mass.",
     provenance: "Carrara Atelier Invitational 2024.",
     certificate: true,
@@ -133,7 +131,7 @@ const fallbackArtworks = [
     currency: "USD",
     inStock: true,
     featured: false,
-    image: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1600&auto=format&fit=crop",
     description: "A futuristic speculative city hovering within infinite crystalline dusk, exploring algorithmic geometry and cybernetic architecture.",
     provenance: "Tokyo Media Arts Fellowship Exhibition.",
     certificate: true,
@@ -154,85 +152,73 @@ const fallbackArtworks = [
     currency: "USD",
     inStock: true,
     featured: false,
-    image: "https://images.unsplash.com/photo-1578925518470-4def7a0f08bb?q=80&w=1200&auto=format&fit=crop",
-    description: "Sweeping gestural brushstrokes with rich volcanic sand textures that reflect desert winds and silent meditation.",
-    provenance: "Doha Contemporary Salon.",
+    image: "https://images.unsplash.com/photo-1578925518470-4def7a0f08bb?q=80&w=1600&auto=format&fit=crop",
+    description: "A meditation on desert winds and temporal stillness rendered through layered natural mineral textures on unprimed canvas.",
+    provenance: "Acquired from Sharjah Biennial Curated Pavilions.",
     certificate: true,
     palette: ["#d97706", "#92400e", "#451a03", "#fef3c7"]
   },
   {
     id: "art-08",
-    title: "Torso in Obsidian Flux",
-    slug: "torso-in-obsidian-flux",
-    artist: "Antoine Delacroix",
+    title: "Torso of Chronos",
+    slug: "torso-of-chronos",
+    artist: "Dimitri Volkoff",
     category: "sculpture",
     categoryLabel: "Sculpture",
-    medium: "Smoked Cast Glass & Forged Iron",
+    medium: "Oxidized Corten Steel and Cast Glass",
     year: 2024,
-    dimensions: "75 x 35 x 25 cm",
-    price: 7800,
-    originalPrice: 8400,
+    dimensions: "85 x 44 x 36 cm",
+    price: 9200,
+    originalPrice: 9900,
     currency: "USD",
-    inStock: true,
+    inStock: false,
     featured: false,
-    image: "https://images.unsplash.com/photo-1569783723326-802c63c95971?q=80&w=1200&auto=format&fit=crop",
-    description: "Translucent smoked glass reflecting subtle lighting shifts throughout the day, grounded by an industrial forged base.",
-    provenance: "Galerie Moderne, Brussels.",
+    image: "https://images.unsplash.com/photo-1569783723326-802c63c95971?q=80&w=1600&auto=format&fit=crop",
+    description: "Raw industrial oxidation meets translucent cyan optical glass, expressing the collision between classical ruin and modern glass architecture.",
+    provenance: "Berlin Kunsthalle Contemporary Showcase.",
     certificate: true,
-    palette: ["#18181b", "#27272a", "#52525b", "#a1a1aa"]
+    palette: ["#78350f", "#0369a1", "#334155", "#0f172a"]
   },
   {
     id: "art-09",
-    title: "Biomorphic Synthesis 01",
-    slug: "biomorphic-synthesis-01",
-    artist: "Dr. Freja Lindqvist",
+    title: "Bioluminescent Singularity",
+    slug: "bioluminescent-singularity",
+    artist: "Zephyr & Co.",
     category: "digital_art",
     categoryLabel: "Digital Art",
-    medium: "Cellular Automata Generative Visuals (GLSL / 60fps Loop)",
+    medium: "Real-time Shader Simulation with Physical Holographic Display",
     year: 2025,
-    dimensions: "Interactive Canvas File + 4K Display Master",
-    price: 1950,
-    originalPrice: 2300,
+    dimensions: "Variable Spatial Installation + 8K Video Master",
+    price: 7800,
+    originalPrice: 8500,
     currency: "USD",
     inStock: true,
-    featured: false,
-    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
-    description: "Living mathematical equations reacting gently to ambient sound, mimicking coral reef growth and bioluminescence.",
-    provenance: "Nordic Digital Art Biennale.",
+    featured: true,
+    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1600&auto=format&fit=crop",
+    description: "Deep-sea biological luminescence reimagined as mathematical manifolds that pulse in response to viewer proximity.",
+    provenance: "Venice Art Biennale Digital Pavilion 2024.",
     certificate: true,
-    palette: ["#10b981", "#06b6d4", "#3b82f6", "#064e3b"]
+    palette: ["#0284c7", "#06b6d4", "#3b82f6", "#0f172a"]
   }
 ];
 
 export default function HomePage() {
-  const [artworks, setArtworks] = useState(fallbackArtworks);
+  const [artworks] = useState(curatedArtworks);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortOrder, setSortOrder] = useState("curated");
   const [priceFilter, setPriceFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState("curated");
   const [selectedArtwork, setSelectedArtwork] = useState(null);
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [heroMode, setHeroMode] = useState("3d_gallery");
 
   useEffect(() => {
     try {
       const savedCart = localStorage.getItem("ziggurat_cart");
       if (savedCart) {
-        const parsed = JSON.parse(savedCart);
-        if (Array.isArray(parsed)) setCartItems(parsed);
+        setCartItems(JSON.parse(savedCart));
       }
     } catch (e) {}
-
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-    fetch(`${apiUrl}/artworks`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.data && data.data.length > 0) {
-          setArtworks(data.data);
-        }
-      })
-      .catch(() => {});
   }, []);
 
   const counts = useMemo(() => {
@@ -300,11 +286,6 @@ export default function HomePage() {
     });
   };
 
-  const scrollToGallery = () => {
-    const el = document.getElementById("gallery-section");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
     <>
       <Navbar
@@ -312,93 +293,40 @@ export default function HomePage() {
         onOpenCart={() => setIsCartOpen(true)}
         onSearch={setSearchQuery}
         activeCategory={selectedCategory}
-        onSelectCategory={(cat) => {
-          setSelectedCategory(cat);
-          scrollToGallery();
-        }}
+        onSelectCategory={(cat) => setSelectedCategory(cat)}
       />
 
-      <main>
-        <section style={{ paddingTop: "clamp(80px, 10vw, 105px)", paddingBottom: "16px" }}>
-          <motion.div 
-            className="container"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "14px",
-              marginBottom: "18px"
-            }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                <span className="tag-badge tag-painting">
+      <main style={{ minHeight: "100vh", paddingTop: "clamp(90px, 11vw, 125px)", paddingBottom: "80px" }}>
+        <section id="gallery-section">
+          <div className="container">
+            <motion.div
+              style={{ textAlign: "center", maxWidth: "680px", margin: "0 auto 36px auto" }}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "14px" }}>
+                <span className="tag-badge tag-painting" style={{ padding: "5px 14px", fontSize: "0.76rem" }}>
                   <Sparkles size={13} />
-                  Atelier Experience
+                  Curated Atelier
                 </span>
               </div>
 
-              <div className="hero-mode-switcher">
-                <button
-                  onClick={() => setHeroMode("3d_gallery")}
-                  className="hero-mode-btn"
-                  style={{
-                    fontWeight: heroMode === "3d_gallery" ? 600 : 400,
-                    background: heroMode === "3d_gallery" ? "var(--gold-primary)" : "transparent",
-                    color: heroMode === "3d_gallery" ? "#090a0f" : "var(--text-secondary)"
-                  }}
-                >
-                  <Box size={14} />
-                  <span>3D Gallery</span>
-                </button>
-
-                <button
-                  onClick={() => setHeroMode("live_easel")}
-                  className="hero-mode-btn"
-                  style={{
-                    fontWeight: heroMode === "live_easel" ? 600 : 400,
-                    background: heroMode === "live_easel" ? "var(--gold-primary)" : "transparent",
-                    color: heroMode === "live_easel" ? "#090a0f" : "var(--text-secondary)"
-                  }}
-                >
-                  <Paintbrush size={14} />
-                  <span>Live Painter</span>
-                </button>
-              </div>
-            </div>
-
-            {heroMode === "3d_gallery" ? (
-              <VirtualGallery3D
-                artworks={artworks}
-                onSelectArtwork={setSelectedArtwork}
-                onAddToCart={handleAddToCart}
-                isInCart={selectedArtwork ? cartItems.some(i => i.id === selectedArtwork.id) : false}
-              />
-            ) : (
-              <PaintingCanvasHero onExploreArt={scrollToGallery} />
-            )}
-          </motion.div>
-        </section>
-
-        <section id="gallery-section" style={{ paddingTop: "clamp(32px, 5vw, 56px)", paddingBottom: "clamp(60px, 8vw, 100px)" }}>
-          <div className="container">
-            <motion.div 
-              style={{ textAlign: "center", maxWidth: "640px", margin: "0 auto 40px auto" }}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-            >
-              <span className="tag-badge tag-painting" style={{ marginBottom: "12px" }}>
-                Curated Atelier
-              </span>
-              <h2 style={{ fontSize: "2.8rem", color: "#fff", lineHeight: "1.15", marginBottom: "14px" }}>
+              <h1 style={{
+                fontSize: "clamp(2.4rem, 4.8vw, 3.8rem)",
+                color: "#fff",
+                lineHeight: "1.1",
+                marginBottom: "14px",
+                letterSpacing: "-0.02em"
+              }}>
                 The Masterworks
-              </h2>
-              <p style={{ color: "var(--text-secondary)", fontSize: "0.98rem", lineHeight: "1.6" }}>
+              </h1>
+
+              <p style={{
+                color: "var(--text-secondary)",
+                fontSize: "clamp(0.92rem, 1.8vw, 1.05rem)",
+                lineHeight: "1.65"
+              }}>
                 Handcrafted canvases, tactile sculptures, and certified digital art created by leading international contemporary masters.
               </p>
             </motion.div>
@@ -414,13 +342,17 @@ export default function HomePage() {
             />
 
             {filteredArtworks.length === 0 ? (
-              <div style={{
-                textAlign: "center",
-                padding: "80px 20px",
-                background: "var(--bg-card)",
-                borderRadius: "var(--radius-md)",
-                border: "1px solid var(--border-subtle)"
-              }}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                style={{
+                  textAlign: "center",
+                  padding: "80px 20px",
+                  background: "var(--bg-card)",
+                  borderRadius: "var(--radius-md)",
+                  border: "1px solid var(--border-subtle)"
+                }}
+              >
                 <h3 style={{ fontSize: "1.4rem", color: "#fff", marginBottom: "8px" }}>No works matching your selection</h3>
                 <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "20px" }}>
                   Adjust your search or reset the filters to discover additional gallery pieces.
@@ -435,100 +367,132 @@ export default function HomePage() {
                 >
                   Reset All Filters
                 </button>
-              </div>
+              </motion.div>
             ) : (
-              <motion.div 
+              <motion.div
+                layout
                 className="artworks-grid"
                 initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, staggerChildren: 0.08 }}
               >
-                {filteredArtworks.map((artwork) => (
-                  <ArtworkCard
-                    key={artwork.id}
-                    artwork={artwork}
-                    onSelect={setSelectedArtwork}
-                    onAddToCart={handleAddToCart}
-                    isInCart={cartItems.some(i => i.id === artwork.id)}
-                  />
-                ))}
+                <AnimatePresence mode="popLayout">
+                  {filteredArtworks.map((artwork) => (
+                    <motion.div
+                      key={artwork.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <ArtworkCard
+                        artwork={artwork}
+                        onSelect={setSelectedArtwork}
+                        onAddToCart={handleAddToCart}
+                        isInCart={cartItems.some(i => i.id === artwork.id)}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </motion.div>
             )}
-          </div>
-        </section>
 
-        <section style={{ padding: "70px 0", background: "rgba(17, 19, 26, 0.6)", borderTop: "1px solid var(--border-subtle)", borderBottom: "1px solid var(--border-subtle)" }}>
-          <div className="container">
-            <motion.div 
-              style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "32px" }}
-              initial={{ opacity: 0, y: 24 }}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
+              style={{
+                marginTop: "clamp(60px, 8vw, 90px)",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                gap: "24px"
+              }}
             >
-              <div style={{ display: "flex", gap: "16px" }}>
-                <div style={{ 
-                  width: "48px", 
-                  height: "48px", 
-                  borderRadius: "12px", 
-                  background: "rgba(226, 177, 112, 0.12)",
+              <div style={{
+                background: "rgba(19, 23, 34, 0.5)",
+                border: "1px solid var(--border-subtle)",
+                borderRadius: "var(--radius-md)",
+                padding: "26px",
+                display: "flex",
+                gap: "16px"
+              }}>
+                <div style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "12px",
+                  background: "rgba(226, 177, 112, 0.1)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "var(--gold-primary)",
                   flexShrink: 0
                 }}>
-                  <ShieldCheck size={24} />
+                  <ShieldCheck size={22} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: "1.2rem", color: "#fff", marginBottom: "6px" }}>Certificate of Authenticity</h3>
-                  <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: "1.6" }}>
-                    Every physical painting and sculpture includes an atelier-signed certificate of provenance with security seal.
+                  <h4 style={{ fontSize: "1.1rem", color: "#fff", marginBottom: "6px" }}>Authenticity & Provenance</h4>
+                  <p style={{ fontSize: "0.86rem", color: "var(--text-secondary)", lineHeight: "1.55" }}>
+                    Every masterwork includes a signed atelier Certificate of Authenticity and cryptographic blockchain registry ledger.
                   </p>
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "16px" }}>
-                <div style={{ 
-                  width: "48px", 
-                  height: "48px", 
-                  borderRadius: "12px", 
-                  background: "rgba(56, 189, 248, 0.12)",
+              <div style={{
+                background: "rgba(19, 23, 34, 0.5)",
+                border: "1px solid var(--border-subtle)",
+                borderRadius: "var(--radius-md)",
+                padding: "26px",
+                display: "flex",
+                gap: "16px"
+              }}>
+                <div style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "12px",
+                  background: "rgba(56, 189, 248, 0.1)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "var(--accent-cyan)",
                   flexShrink: 0
                 }}>
-                  <Award size={24} />
+                  <Truck size={22} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: "1.2rem", color: "#fff", marginBottom: "6px" }}>Museum Provenance</h3>
-                  <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: "1.6" }}>
-                    Selected artists have works exhibited across prestigious biennales, private foundations, and international salons.
+                  <h4 style={{ fontSize: "1.1rem", color: "#fff", marginBottom: "6px" }}>White-Glove Fine Art Transit</h4>
+                  <p style={{ fontSize: "0.86rem", color: "var(--text-secondary)", lineHeight: "1.55" }}>
+                    Climate-controlled, armored transport managed worldwide by Cadogan Tate and Hasenkamp specialized couriers.
                   </p>
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "16px" }}>
-                <div style={{ 
-                  width: "48px", 
-                  height: "48px", 
-                  borderRadius: "12px", 
-                  background: "rgba(244, 63, 94, 0.12)",
+              <div style={{
+                background: "rgba(19, 23, 34, 0.5)",
+                border: "1px solid var(--border-subtle)",
+                borderRadius: "var(--radius-md)",
+                padding: "26px",
+                display: "flex",
+                gap: "16px"
+              }}>
+                <div style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "12px",
+                  background: "rgba(244, 63, 94, 0.1)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "var(--accent-crimson)",
                   flexShrink: 0
                 }}>
-                  <Compass size={24} />
+                  <Lock size={22} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: "1.2rem", color: "#fff", marginBottom: "6px" }}>Private Advisory</h3>
-                  <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: "1.6" }}>
-                    Our curatorial directors assist corporate collectors and private estates with custom commissions and framing.
+                  <h4 style={{ fontSize: "1.1rem", color: "#fff", marginBottom: "6px" }}>Private Vault Custody</h4>
+                  <p style={{ fontSize: "0.86rem", color: "var(--text-secondary)", lineHeight: "1.55" }}>
+                    Complimentary bonded freeport vault storage in Geneva, Zurich, and Singapore prior to private collection delivery.
                   </p>
                 </div>
               </div>
@@ -537,30 +501,22 @@ export default function HomePage() {
         </section>
       </main>
 
-      <Footer onSelectCategory={(cat) => { setSelectedCategory(cat); scrollToGallery(); }} />
+      <Footer onSelectCategory={(cat) => setSelectedCategory(cat)} />
 
-      <AnimatePresence>
-        {selectedArtwork && (
-          <ArtworkModal
-            artwork={selectedArtwork}
-            onClose={() => setSelectedArtwork(null)}
-            onAddToCart={handleAddToCart}
-            isInCart={selectedArtwork ? cartItems.some(i => i.id === selectedArtwork.id) : false}
-          />
-        )}
-      </AnimatePresence>
+      <ArtworkModal
+        artwork={selectedArtwork}
+        onClose={() => setSelectedArtwork(null)}
+        onAddToCart={handleAddToCart}
+        isInCart={selectedArtwork ? cartItems.some(i => i.id === selectedArtwork.id) : false}
+      />
 
-      <AnimatePresence>
-        {isCartOpen && (
-          <CartDrawer
-            isOpen={isCartOpen}
-            onClose={() => setIsCartOpen(false)}
-            cartItems={cartItems}
-            onRemoveItem={handleRemoveItem}
-            onClearCart={() => setCartItems([])}
-          />
-        )}
-      </AnimatePresence>
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        cartItems={cartItems}
+        onRemoveItem={handleRemoveItem}
+        onClearCart={() => setCartItems([])}
+      />
     </>
   );
 }
