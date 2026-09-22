@@ -13,6 +13,11 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
   const [hoveredArt, setHoveredArt] = useState(null);
   const [isMobileView, setIsMobileView] = useState(false);
 
+  const isCinematicRef = useRef(isCinematic);
+  isCinematicRef.current = isCinematic;
+  const activeArtworkRef = useRef(activeArtwork);
+  activeArtworkRef.current = activeArtwork;
+
   const cameraPosRef = useRef({ x: 0, y: 2.3, z: 24 });
   const cameraLookRef = useRef({ x: 0, y: 2.3, z: 0 });
   const targetLookRef = useRef({ x: 0, y: 2.3, z: 0 });
@@ -388,7 +393,7 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
       animId = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
 
-      if (isCinematic && !activeArtwork && !isDraggingRef.current) {
+      if (isCinematicRef.current && !activeArtworkRef.current && !isDraggingRef.current) {
         const cycleProgress = (Math.sin(elapsedTime * 0.14) + 1) / 2;
         const targetZ = THREE.MathUtils.lerp(22, -10, cycleProgress);
         const swayX = Math.sin(elapsedTime * 0.35) * 1.4;
@@ -426,7 +431,7 @@ export default function VirtualGallery3D({ artworks, onSelectArtwork, onAddToCar
       if (tweenRef.current) tweenRef.current.kill();
       renderer.dispose();
     };
-  }, [artworks, focusOnArtwork, isCinematic, activeArtwork]);
+  }, [artworks, focusOnArtwork]);
 
   return (
     <div
